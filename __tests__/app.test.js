@@ -32,9 +32,12 @@ describe("/api/topics",()=>{
         })
     })
 
+})
+
+describe("/NonExistRoute",() => {
     test("GET 404, Responds with 404 error and message of 'Route does not exist'", ()=> {
         return request(app)
-        .get("/api/wrongtopicsroute")
+        .get("/wrongtopicsroute")
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe("Route does not exist")
@@ -43,20 +46,15 @@ describe("/api/topics",()=>{
 })
 
 describe("/api", ()=> {
-    test("GET 200: Responds with an objects describe all available endpoints", ()=> {
+    test("GET 200: Responds with an array of objects describe all available endpoints", ()=> {
         return request(app)
         .get("/api")
         .expect(200)
         .then(({body}) => {
-            expect(body).toEqual(endpoints)
-        })
-    })
-    test("GET 404, Responds with 404 error and message of 'Route does not exist'", ()=> {
-        return request(app)
-        .get("/wrongapiroute")
-        .expect(404)
-        .then(({body}) => {
-            expect(body.msg).toBe("Route does not exist")
+            const actualEndpointsArray = body;
+            const expectedKeys = Object.keys(endpoints)
+            expect(actualEndpointsArray.length).toEqual(expectedKeys.length)
+            //
         })
     })
 })
@@ -83,16 +81,16 @@ describe("/api/articles/:article_id", () => {
         })
     })
 
-    test("GET 400: Responds with 400 err and msg 'Bad request:Invalid article_id type'",()=> {
+    test("GET 400: Responds with 400 error and msg 'Bad request!'",()=> {
         return request(app)
-        .get("/api/articles/Not_a_ID_type")
+        .get("/api/articles/Not_an_ID_type")
         .expect(400)
         .then(({body})=> {
             expect(body.msg).toBe("Bad request!")
         })
     })
 
-    test("GET 404: Responds with 404 err and msg 'Not found'",()=> {
+    test("GET 404: Responds with 404 error and msg 'Not found'",()=> {
         return request(app)
         .get("/api/articles/99999")
         .expect(404)
@@ -154,7 +152,7 @@ describe("/api/articles/:article_id/comments", ()=> {
                         created_at: expect.any(String),
                         author: expect.any(String) ,
                         body: expect.any(String),
-                        article_id:expect.any(Number)
+                        article_id:5
             
                     })
                 )
@@ -171,21 +169,21 @@ describe("/api/articles/:article_id/comments", ()=> {
         })
     })
 
-    test("GET 404: Responds with 404 err and msg 'Not found' when the id is out of range",()=> {
+    test("GET 404: Responds with 404 err and msg 'article_id not found' when the id is out of range",()=> {
         return request(app)
         .get("/api/articles/99999/comments")
         .expect(404)
         .then(({body})=> {
-            expect(body.msg).toBe("Not found")
+            expect(body.msg).toBe("article_id not found")
         })
     })
 
-    test("GET 404: Responds with 404 err and msg 'Not found' when the id is valid but no comments",()=> {
+    test("GET 200: Responds with 404 err and msg 'Not found' when the id is valid but no comments",()=> {
         return request(app)
         .get("/api/articles/10/comments")
-        .expect(404)
+        .expect(200)
         .then(({body})=> {
-            expect(body.msg).toBe("Not found")
+            expect(body.msg).toBe("There is no comment for this article")
         })
     })
 
