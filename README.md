@@ -7,4 +7,4 @@ Instructions:
     - Create a file under the root directory of this project named ".env.development".
     - In the ".env.development" file you created, set the file content to "PGDATABASE=nc_news".
     - There is a file called "env-example", you can check the example to set the database name.
-    
+  
