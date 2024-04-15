@@ -24,4 +24,6 @@ function fetchAllArticles(){
     })
 }
 
+
+
 module.exports = { fetchArticleById, fetchAllArticles }

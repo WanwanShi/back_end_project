@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
-const {getAllTopics} = require("./controllers/topics_controllers")
-const {getAllEndpoints} = require("./controllers/endpoints_controllers")
-const {getArticleById, getAllArticles} = require("./controllers/articles_controllers")
+const { getAllTopics } = require("./controllers/topics_controllers")
+const { getAllEndpoints } = require("./controllers/endpoints_controllers")
+const { getArticleById, getAllArticles } = require("./controllers/articles_controllers")
+const { getCommentsByArticleId } = require("./controllers/comments_controllers")
 
 app.use(express.json());
 
@@ -12,6 +13,7 @@ app.get("/api/topics", getAllTopics)
 
 app.get("/api/articles", getAllArticles)
 app.get("/api/articles/:article_id", getArticleById)
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId )
 
 app.get("*",(req,res,next) => {
     res.status(404).send({ msg: "Route does not exist" })
