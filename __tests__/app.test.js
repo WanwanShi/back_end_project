@@ -22,10 +22,12 @@ describe("/api/topics",()=>{
             const { topics } = body 
             expect(topics.length).toBe(3)
             topics.forEach((topic) => {
-                expect.objectContaining({
+                expect(topic).toEqual(
+                    expect.objectContaining({
                     slug: expect.any(String),
                     description: expect.any(String)
                 })
+                )
             })
         })
     })
@@ -55,6 +57,47 @@ describe("/api", ()=> {
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe("Route does not exist")
+        })
+    })
+})
+
+describe("/api/articles/:article_id", () => {
+    test("GET 200:  Responds with the object that has the required article_id and all the properties",()=> {
+        return request(app)
+        .get("/api/articles/3")
+        .expect(200)
+        .then(({body}) => {
+            const {article} = body;
+            expect(article).toEqual(
+                expect.objectContaining({
+                    article_id: 3,
+                    title: "Eight pug gifs that remind me of mitch",
+                    topic: "mitch",
+                    author: "icellusedkars",
+                    body: "some gifs",
+                    created_at: expect.any(String),
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                    votes: 0,
+                })
+            )
+        })
+    })
+
+    test("GET 400: Responds with 400 err and msg 'Bad request:Invalid article_id type'",()=> {
+        return request(app)
+        .get("/api/articles/Not_a_ID_type")
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("GET 404: Responds with 404 err and msg 'Not found'",()=> {
+        return request(app)
+        .get("/api/articles/99999")
+        .expect(404)
+        .then(({body})=> {
+            expect(body.msg).toBe("Not found")
         })
     })
 })
