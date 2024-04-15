@@ -15,4 +15,5 @@ function getAllArticles(req, res, next){
     })
 }
 
+
 module.exports = {getArticleById, getAllArticles}

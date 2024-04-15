@@ -136,3 +136,56 @@ describe("/api/articles",() => {
         })
     })
 })
+
+describe("/api/articles/:article_id/comments", ()=> {
+    test("GET 200: Responds with array of comments objects for the given article_id", ()=> {
+        return request(app)
+        .get("/api/articles/5/comments")
+        .expect(200)
+        .then(({body})=> {
+            const {comments} = body;
+            expect(comments.length).toBe(2);
+            expect(comments).toBeSortedBy('created_at',{ descending:true })
+            comments.forEach((comment) => {
+                expect(comment).toEqual(
+                    expect.objectContaining({
+                        comment_id: expect.any(Number),
+                        votes: expect.any(Number),
+                        created_at: expect.any(String),
+                        author: expect.any(String) ,
+                        body: expect.any(String),
+                        article_id:expect.any(Number)
+            
+                    })
+                )
+            })
+        })
+    })
+
+    test("GET 400: Responds with 400 err and msg 'Bad request:Invalid article_id type'",()=> {
+        return request(app)
+        .get("/api/articles/Not_a_ID_type/comments")
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("GET 404: Responds with 404 err and msg 'Not found' when the id is out of range",()=> {
+        return request(app)
+        .get("/api/articles/99999/comments")
+        .expect(404)
+        .then(({body})=> {
+            expect(body.msg).toBe("Not found")
+        })
+    })
+
+    test("GET 404: Responds with 404 err and msg 'Not found' when the id is valid but no comments",()=> {
+        return request(app)
+        .get("/api/articles/10/comments")
+        .expect(404)
+        .then(({body})=> {
+            expect(body.msg).toBe("Not found")
+        })
+    })
+})
