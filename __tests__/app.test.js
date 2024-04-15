@@ -101,3 +101,38 @@ describe("/api/articles/:article_id", () => {
         })
     })
 })
+
+describe("/api/articles",() => {
+    test("GET 200: Responds with array of all the articles objects", ()=> {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({body}) => {
+            const articles = body
+            expect(articles.length).toBe(13)
+            articles.forEach((article) => {
+                expect(article).toEqual(
+                    expect.objectContaining({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        comment_count: expect.any(Number),
+                        created_at: expect.any(String),
+                        article_img_url: expect.any(String),
+                        votes: expect.any(Number),
+                    })
+                )
+            })
+        })
+    })
+
+    test("GET 404: Responds with 404 error and message of 'Route does not exist'", ()=> {
+        return request(app)
+        .get("/api/wrongarticlesroute")
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Route does not exist")
+        })
+    })
+})
