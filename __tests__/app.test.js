@@ -188,4 +188,87 @@ describe("/api/articles/:article_id/comments", ()=> {
             expect(body.msg).toBe("Not found")
         })
     })
+
+    test("POST 201: Responds with the comment posted", ()=> {
+        return request(app)
+        .post("/api/articles/7/comments")
+        .send({
+            username: "lurker",
+            body:"This is just something I want to test, Thank you!"
+        })
+        .expect(201)
+        .then(({body}) => {
+            const {comment} = body;
+            expect(comment).toEqual({
+                author: "lurker",
+                body:"This is just something I want to test, Thank you!"
+            })
+        })
+    })
+    
+    test("POST 400: responds with err and message 'Bad request!' if the article_id is invalid data type", () => {
+        return request(app)
+        .post("/api/articles/not_correct_id_type/comments")
+        .send({
+            username: "lurker",
+            body:"This is new message I want to test, Thank you!"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("POST 404: responds with err and message 'Bad request!' if the article_id is out of range", () => {
+        return request(app)
+        .post("/api/articles/999999/comments")
+        .send({
+            username: "lurker",
+            body:"This is new message I want to test, Thank you!"
+        })
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Not found")
+        })
+    })
+
+    test("POST 400: responds with err and message 'Bad request!' if the request body missing username or body", () => {
+        return request(app)
+        .post("/api/articles/3/comments")
+        .send({
+            body:"This is new message I want to test, Thank you!"
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("POST 404: responds with err and message 'Not found' if the request username is not in the users database", () => {
+        return request(app)
+        .post("/api/articles/3/comments")
+        .send({
+            username:"usernamedoesnotexistintheuserdatabase",
+            body:"This is new message I want to test, Thank you!"
+        })
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Not found")
+        })
+    })
+
+    test("POST 400: responds with err and message 'Bad request-The comment is empty' if the request body is empty string", () => {
+        return request(app)
+        .post("/api/articles/3/comments")
+        .send({
+            username:"lurker",
+            body:""
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request-The comment is empty")
+        })
+    })
+
+
 })
