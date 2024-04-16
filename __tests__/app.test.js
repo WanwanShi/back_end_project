@@ -13,7 +13,7 @@ beforeEach(() => {
     return seed(data);
 });
 
-describe("/api/topics",()=>{
+describe("/api/topics",() => {
     test("GET 200, responds with array of all topic objects which have slug and description properties", ()=> {
         return request(app)
         .get("/api/topics")
@@ -217,7 +217,7 @@ describe("/api/articles",() => {
     })
 })
 
-describe("/api/articles/:article_id/comments", ()=> {
+describe("/api/articles/:article_id/comments", () => {
     test("GET 200: Responds with array of comments objects for the given article_id", ()=> {
         return request(app)
         .get("/api/articles/5/comments")
@@ -353,6 +353,30 @@ describe("/api/articles/:article_id/comments", ()=> {
         .expect(400)
         .then(({body}) => {
             expect(body.msg).toBe("Bad request-The comment is empty")
+        })
+    })
+})
+
+describe("/api/comments/:comment_id", () => {
+    test("DELETE 204: Responds with no content and 204 status", () => {
+        return request(app)
+        .delete("/api/comments/12")
+        .expect(204)
+    })
+    test("DELETE 400: Responds with error msg 'Bad request!' if comment_id is wrong data type", () => {
+        return request(app)
+        .delete("/api/comments/not_Id_type")
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("DELETE 404: Responds with error msg 'comment_id not found' if comment_id is not in the database", () => {
+        return request(app)
+        .delete("/api/comments/456123")
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("comment_id not found")
         })
     })
 })
