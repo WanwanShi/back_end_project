@@ -98,6 +98,88 @@ describe("/api/articles/:article_id", () => {
             expect(body.msg).toBe("Not found")
         })
     })
+
+    test("PATCH 200: Responds with the updated article object",()=> {
+        return request(app)
+        .patch("/api/articles/3")
+        .send({
+            inc_votes: 1 
+        })
+        .expect(200)
+        .then(({body}) => {
+            const {updatedArticle} = body;
+            expect(updatedArticle).toEqual(
+                expect.objectContaining({
+                    article_id: 3,
+                    title: "Eight pug gifs that remind me of mitch",
+                    topic: "mitch",
+                    author: "icellusedkars",
+                    body: "some gifs",
+                    created_at: expect.any(String),
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                    votes: 1,
+                })
+            )
+        })
+    })
+
+    test("PATCH 400: Respond with error and msg of 'Bad request!' if article_id is wrong data type",()=> {
+        return request(app)
+        .patch("/api/articles/not_correct_Id_type")
+        .send({
+            inc_votes: 1 
+        })
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("PATCH 404: Respond with error and msg of 'Article_id not found' if article_id is not in the database",()=> {
+        return request(app)
+        .patch("/api/articles/99999")
+        .send({
+            inc_votes: 1 
+        })
+        .expect(404)
+        .then(({body})=> {
+            expect(body.msg).toBe("Article_id not found")
+        })
+    })
+    test("PATCH 400: Respond with error and msg of 'Bad request' if the request body is invalid data type",()=> {
+        return request(app)
+        .patch("/api/articles/5")
+        .send({
+            inc_votes: 'not a number' 
+        })
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("PATCH 200: Responds with the updated article with votes go to 0 if the updated votes less than 0",()=> {
+        return request(app)
+        .patch("/api/articles/3")
+        .send({
+            inc_votes: -20 
+        })
+        .expect(200)
+        .then(({body}) => {
+            const {updatedArticle} = body;
+            expect(updatedArticle).toEqual(
+                expect.objectContaining({
+                    article_id: 3,
+                    title: "Eight pug gifs that remind me of mitch",
+                    topic: "mitch",
+                    author: "icellusedkars",
+                    body: "some gifs",
+                    created_at: expect.any(String),
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                    votes: 0,
+                })
+            )
+        })
+    })
 })
 
 describe("/api/articles",() => {
@@ -273,6 +355,5 @@ describe("/api/articles/:article_id/comments", ()=> {
             expect(body.msg).toBe("Bad request-The comment is empty")
         })
     })
-
-
 })
+

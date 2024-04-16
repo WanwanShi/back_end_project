@@ -1,4 +1,4 @@
-const {fetchCommentsByArticleId,updateCommentByArticleId} = require("../models/comments_models")
+const {fetchCommentsByArticleId,addCommentByArticleId} = require("../models/comments_models")
 
 function getCommentsByArticleId(req, res, next){
     const {article_id} = req.params;
@@ -11,7 +11,7 @@ function getCommentsByArticleId(req, res, next){
 function postCommentByArticleId(req, res, next){
     const { article_id } = req.params;
     const commentObject = req.body
-    updateCommentByArticleId(article_id,commentObject).then((comment) => {
+    addCommentByArticleId(article_id,commentObject).then((comment) => {
         res.status(201).send({comment})
     })
     .catch((err) => {
