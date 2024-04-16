@@ -10,9 +10,11 @@ function getArticleById(req,res,next){
 }
 
 function getAllArticles(req, res, next){
-    fetchAllArticles().then((articles) => {
-        res.status(200).send(articles)
+    const query = req.query
+    fetchAllArticles(query).then((articles) => {
+        res.status(200).send({articles})
     })
+    .catch(next)
 }
 
 function patchArticleById(req, res, next){
