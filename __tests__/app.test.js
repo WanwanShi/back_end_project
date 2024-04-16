@@ -81,7 +81,7 @@ describe("/api/articles/:article_id", () => {
         })
     })
 
-    test("GET 200:  Responds with the object that has the required article_id and all the properties along with the comment_count property",()=> {
+    test("GET 200:  Responds with the object that has the required article_id and all the properties along with the correct comment_count number if there are comments associated with the article_id",()=> {
         return request(app)
         .get("/api/articles/3")
         .expect(200)
@@ -98,6 +98,28 @@ describe("/api/articles/:article_id", () => {
                     article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
                     votes: 0,
                     comment_count: 2
+                })
+            )
+        })
+    })
+
+    test("GET 200:  Responds with the object that has the required article_id and the properties along with the comment_count of 0 if there is no comment",()=> {
+        return request(app)
+        .get("/api/articles/4")
+        .expect(200)
+        .then(({body}) => {
+            const {article} = body;
+            expect(article).toEqual(
+                expect.objectContaining({
+                    article_id: 4,
+                    title: "Student SUES Mitch!",
+                    topic: "mitch",
+                    author: "rogersop",
+                    body: "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages",
+                    created_at: expect.any(String),
+                    article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                    votes: 0,
+                    comment_count: 0
                 })
             )
         })

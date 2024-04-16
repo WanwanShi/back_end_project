@@ -2,7 +2,7 @@ const db = require("../db/connection")
 const {fetchAllTopics} = require("../models/topics_models")
 
 function fetchArticleById(article_id){
-    const sqlString = `SELECT  articles.article_id, articles.title, articles.author,articles.topic,articles.body, articles.created_at,articles.votes,articles.article_img_url, COUNT(*)::INT AS  comment_count
+    const sqlString = `SELECT  articles.article_id, articles.title, articles.author,articles.topic,articles.body, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.body)::INT AS  comment_count
     FROM articles
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id
