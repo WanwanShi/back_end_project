@@ -188,7 +188,7 @@ describe("/api/articles",() => {
         .get("/api/articles")
         .expect(200)
         .then(({body}) => {
-            const articles = body
+            const {articles} = body
             expect(articles.length).toBe(13)
             articles.forEach((article) => {
                 expect(article).toEqual(
@@ -213,6 +213,48 @@ describe("/api/articles",() => {
         .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe("Route does not exist")
+        })
+    })
+
+    test("GET 200: Responds with array of article objects filtered by topic query", ()=> {
+        return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({body}) => {
+            const {articles} = body;
+            expect(articles.length).toBe(12);
+            articles.forEach((article)=> {
+                expect(article).toEqual(
+                    expect.objectContaining({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: 'mitch',
+                        author: expect.any(String),
+                        comment_count: expect.any(Number),
+                        created_at: expect.any(String),
+                        article_img_url: expect.any(String),
+                        votes: expect.any(Number),
+                    })
+                )
+            })
+        })
+    })
+
+    test("GET 400: Responds with error and msg 'Bad request!' if the topic query does not exist in the database", ()=> {
+        return request(app)
+        .get("/api/articles?topic=topic_does_not_exist_in_database")
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("GET 200: Responds msg 'There is no article under this topic.' if the topic query exist but no linked article", ()=> {
+        return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({body}) => {
+            expect(body.msg).toBe("There is no article under this topic.")
         })
     })
 })
