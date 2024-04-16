@@ -35,4 +35,14 @@ function checkArticleIDExists(article_id){
     })
 }
 
-module.exports = { fetchArticleById, fetchAllArticles,checkArticleIDExists }
+function updateArticleById(article_id, inc_votes){
+    return Promise.all([db.query(`UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`, [inc_votes,article_id]),checkArticleIDExists(article_id)])
+    .then(([{rows}]) => {
+        const updatedArticle = rows[0];
+        if(updatedArticle.votes < 0){
+            updatedArticle.votes = 0
+        }
+        return updatedArticle
+    })
+}
+module.exports = { fetchArticleById, fetchAllArticles,checkArticleIDExists, updateArticleById }

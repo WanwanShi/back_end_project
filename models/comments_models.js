@@ -4,11 +4,8 @@ const { checkArticleIDExists } = require("./articles_models");
 
 function fetchCommentsByArticleId(article_id){
     
-    return checkArticleIDExists(article_id)
-    .then(()=> {
-        return db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`, [article_id])
-    })
-    .then(({rows}) => {
+    return Promise.all([db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`, [article_id]),checkArticleIDExists(article_id)])
+    .then(([{rows}]) => {
             if(rows.length === 0){
                 return Promise.reject({ status:200, msg: "There is no comment for this article"})
             }
@@ -16,7 +13,7 @@ function fetchCommentsByArticleId(article_id){
         })  
 }
 
-function updateCommentByArticleId(article_id, commentObject){
+function addCommentByArticleId(article_id, commentObject){
     const {username, body} = commentObject
     if(body === ""){
         return Promise.reject({status: 400, msg: "Bad request-The comment is empty"})
@@ -26,4 +23,4 @@ function updateCommentByArticleId(article_id, commentObject){
         return rows[0];
     })
 }
-module.exports = { fetchCommentsByArticleId, updateCommentByArticleId }
+module.exports = { fetchCommentsByArticleId, addCommentByArticleId }
