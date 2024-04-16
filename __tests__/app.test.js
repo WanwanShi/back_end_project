@@ -169,12 +169,12 @@ describe("/api/articles/:article_id/comments", ()=> {
         })
     })
 
-    test("GET 404: Responds with 404 err and msg 'article_id not found' when the id is out of range",()=> {
+    test("GET 404: Responds with 404 err and msg 'Article_id not found' when the id is out of range",()=> {
         return request(app)
         .get("/api/articles/99999/comments")
         .expect(404)
         .then(({body})=> {
-            expect(body.msg).toBe("article_id not found")
+            expect(body.msg).toBe("Article_id not found")
         })
     })
 
@@ -197,10 +197,16 @@ describe("/api/articles/:article_id/comments", ()=> {
         .expect(201)
         .then(({body}) => {
             const {comment} = body;
-            expect(comment).toEqual({
-                author: "lurker",
-                body:"This is just something I want to test, Thank you!"
-            })
+            expect(comment).toEqual(
+                expect.objectContaining({
+                    comment_id: 19,
+                    body: 'This is just something I want to test, Thank you!',
+                    article_id: 7,
+                    author: 'lurker',
+                    votes: 0,
+                    created_at: expect.any(String)
+                })
+            )
         })
     })
     
