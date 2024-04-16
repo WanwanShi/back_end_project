@@ -98,5 +98,10 @@
       }
     ]
   }
+},
+"DELETE /api/comments/:comment_id": {
+  "description": "no contents send",
+  "queries": [],
+  "exampleResponse": "no response"
 }
 }
