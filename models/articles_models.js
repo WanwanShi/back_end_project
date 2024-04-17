@@ -19,10 +19,20 @@ function fetchArticleById(article_id){
             })
 }
 
-function fetchAllArticles(query){
-    const { topic } = query;
+function fetchAllArticles(topic,sort_by="created_at",order="desc"){
     
-    let sqlString = `SELECT  articles.article_id, articles.title, articles.author,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(*)::INT AS  comment_count
+    const sortByGreenList = ["article_id", "title", "topic", "author","created_at","votes","body"];
+    const orderGreenList = ["desc", "asc"];
+
+    if(!sortByGreenList.includes(sort_by)){
+        return Promise.reject({status: 400, msg: "Bad request-Invalid sort_by query!" })
+    }
+
+    if(!orderGreenList.includes(order)){
+        return Promise.reject({status: 400, msg: "Bad request-Invalid order query!" })
+    }
+    
+    let sqlString = `SELECT  articles.article_id, articles.title, articles.author,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.body)::INT AS  comment_count
     FROM articles
     LEFT JOIN comments 
     ON articles.article_id = comments.article_id`;
@@ -33,9 +43,11 @@ function fetchAllArticles(query){
         queryVal.push(topic);
     }
 
-    sqlString += ` GROUP BY articles.article_id
-    ORDER BY articles.created_at DESC;`
+    sqlString += ` GROUP BY articles.article_id`
+    
 
+    sqlString += ` ORDER BY articles.${sort_by} ${order};`
+    
     return Promise.all([db.query(sqlString,queryVal),fetchAllTopics()])
     .then(([{rows},topics])=> {
         
