@@ -301,6 +301,66 @@ describe("/api/articles",() => {
             expect(body.msg).toBe("There is no article under this topic.")
         })
     })
+
+    test("GET 200: Responds with array of article objects with ordered by the specified sort_by query descend by default", ()=> {
+        return request(app)
+        .get("/api/articles?sort_by=author")
+        .expect(200)
+        .then(({body})=> {
+            const {articles} = body
+            expect(articles.length).toBe(13)
+            expect(articles).toBeSortedBy('author', {descending: true})
+        })
+    })
+    
+    test("GET 400: Responds with error message 'Bad request-Invalid sort_by query!' when the the sort_by query is invalid(not valid column)",()=>{
+        return request(app)
+        .get("/api/articles?sort_by=invalid_sort_by_name")
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request-Invalid sort_by query!")
+        })
+    })
+
+    test("GET 200: Responds with array of article objects with ordered by defaulted 'created_at' with the specified order query", ()=> {
+        return request(app)
+        .get("/api/articles?order=asc")
+        .expect(200)
+        .then(({body})=> {
+            const {articles} = body
+            expect(articles.length).toBe(13)
+            expect(articles).toBeSortedBy('created_at', {ascending: true})
+        })
+    })
+
+    test("GET 400: Responds with with error message 'Bad request-Invalid order query!' when the the order query is invalid(not asc or desc)", ()=> {
+        return request(app)
+        .get("/api/articles?order=invalid_order")
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request-Invalid order query!")
+        })
+    })
+
+    test("GET 200: Responds with array of article objects with both order and sort_by query", ()=> {
+        return request(app)
+        .get("/api/articles?sort_by=author&&order=asc")
+        .expect(200)
+        .then(({body})=> {
+            const {articles} = body
+            expect(articles.length).toBe(13)
+            expect(articles).toBeSortedBy('author', {ascending: true})
+        })
+    })
+
+    test("GET 400: Responds with corresponding error message if one of the query is invalid", ()=> {
+        return request(app)
+        .get("/api/articles?sort_by=author&&order=something_invalid")
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request-Invalid order query!")
+        })
+    })
 })
 
 describe("/api/articles/:article_id/comments", () => {
