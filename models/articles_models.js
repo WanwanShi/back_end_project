@@ -85,4 +85,31 @@ function updateArticleById(article_id, inc_votes){
         return updatedArticle
     })
 }
-module.exports = { fetchArticleById, fetchAllArticles,checkArticleIDExists, updateArticleById }
+
+function addArticle(articleRequestObj){
+    const {author, title, body, topic, article_img_url} = articleRequestObj;
+    
+    if(body === '' || title === ''){
+        return Promise.reject({ status: 400, msg: "You can't post empty title or empty article!"})
+    }
+    const insertVal = [title,topic,author,body,article_img_url]
+    if(article_img_url){
+        sqlString = `INSERT INTO articles (title,topic,author,body ,article_img_url) VALUES ($1,$2,$3,$4,$5) RETURNING *`;
+        
+    }else{
+        sqlString = `INSERT INTO articles (title,topic,author,body) VALUES ($1,$2,$3,$4) RETURNING *;`
+        insertVal.pop()
+    }
+    return db.query(sqlString,insertVal)
+    .then(({rows})=>{
+        const newArticle = rows[0];
+        //Method 1---set comment_count as 0 since it is newly created article
+        newArticle.comment_count = 0;
+        return newArticle
+        //Method 2 use this article_id and the function fetchArticleById()
+        // return fetchArticleById(newArticle.article_id)
+    })
+    
+    
+}
+module.exports = { fetchArticleById, fetchAllArticles,checkArticleIDExists, updateArticleById, addArticle }

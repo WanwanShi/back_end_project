@@ -1,5 +1,5 @@
-const articles = require("../db/data/test-data/articles")
-const {fetchArticleById,fetchAllArticles, updateArticleById} = require("../models/articles_models")
+
+const {fetchArticleById,fetchAllArticles, updateArticleById,addArticle} = require("../models/articles_models")
 
 function getArticleById(req,res,next){
     const{ article_id } = req.params
@@ -14,9 +14,7 @@ function getAllArticles(req, res, next){
     fetchAllArticles(topic,sort_by,order).then((articles) => {
         res.status(200).send({articles})
     })
-    .catch((err)=>{
-        next(err)
-    })
+    .catch(next)
 }
 
 function patchArticleById(req, res, next){
@@ -29,5 +27,13 @@ function patchArticleById(req, res, next){
     .catch(next)
 }
 
+function postArticle(req, res, next){
+    const articleRequestObj = req.body
+    addArticle(articleRequestObj).then((article) => {
+        res.status(201).send({article})
+    })
+    .catch(next)
+}
 
-module.exports = {getArticleById, getAllArticles,patchArticleById}
+
+module.exports = {getArticleById, getAllArticles,patchArticleById, postArticle}
