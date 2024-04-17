@@ -361,6 +361,76 @@ describe("/api/articles",() => {
             expect(body.msg).toBe("Bad request-Invalid order query!")
         })
     })
+
+    test("POST 201: Responds with a new created article object", () => {
+        return request(app)
+        .post("/api/articles")
+        .send({
+            author:'butter_bridge',
+            title: 'Post article',
+            body:'This is test for post new article',
+            topic:'cats',
+            article_img_url:'https://testimages.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+        })
+        .expect(201)
+        .then(({body}) =>{
+            const {article} = body
+            expect(article).toEqual(
+                expect.objectContaining({
+                    article_id: 14,
+                    votes:0,
+                    created_at: expect.any(String),
+                    comment_count: 0,
+                    author:'butter_bridge',
+                    title: 'Post article',
+                    body:'This is test for post new article',
+                    topic:'cats',
+                    article_img_url:'https://testimages.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+            )
+        })
+    })
+    test("POST 400: Responds with error message 'Bad request!' if the null request body is missing", ()=>{
+        return request(app)
+        .post("/api/articles")
+        .send({
+            title: 'Post article',
+            body:'This is test for post new article',
+            topic:'cats',
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("POST 400: Responds with error message 'You can't post empty title or empty article!' if the title or body is empty", ()=>{
+        return request(app)
+        .post("/api/articles")
+        .send({
+            author:'butter_bridge',
+            title: '',
+            body: '',
+            topic: 'cats',
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("You can't post empty title or empty article!")
+        })
+    })
+    test("POST 404: Responds with error message 'Not found' if the foreign key 'author' or 'topic' is not found in the corresponding tables", ()=>{
+        return request(app)
+        .post("/api/articles")
+        .send({
+            author:'user_does_not_exist_in_users_table',
+            title: 'Post article',
+            body:'This is test for post new article',
+            topic:'cats',
+        })
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Not found")
+        })
+    })
 })
 
 describe("/api/articles/:article_id/comments", () => {
@@ -525,6 +595,81 @@ describe("/api/comments/:comment_id", () => {
             expect(body.msg).toBe("comment_id not found")
         })
     })
+    test("PATCH 200: Responds with the updated comment object with increase votes", ()=> {
+        return request(app)
+        .patch("/api/comments/10")
+        .send({
+            inc_votes: 4
+        })
+        .expect(200)
+        .then(({body}) => {
+            const {updatedComment} = body
+            expect(updatedComment).toEqual(
+                expect.objectContaining({
+                    comment_id: 10,
+                    body: 'git push origin master',
+                    article_id:  3 ,
+                    author:'icellusedkars',
+                    votes: 4,
+                    created_at: expect.any(String)
+                })
+            )
+        })
+    })
+    test("PATCH 200: Responds with the updated comment object with decrease votes", ()=> {
+        return request(app)
+        .patch("/api/comments/3")
+        .send({
+            inc_votes: -4
+        })
+        .expect(200)
+        .then(({body}) => {
+            const {updatedComment} = body
+            expect(updatedComment).toEqual(
+                expect.objectContaining({
+                    comment_id: 3,
+                    body: 'Replacing the quiet elegance of the dark suit and tie with the casual indifference of these muted earth tones is a form of fashion suicide, but, uh, call me crazy — onyou it works.',
+                    article_id:  1 ,
+                    author:'icellusedkars',
+                    votes: 96,
+                    created_at: expect.any(String)
+                })
+            )
+        })
+    })
+    test("PATCH 400: Responds with error message 'Bad request!' if inv_votes is invalid data type", ()=>{
+        return request(app)
+        .patch("/api/comments/10")
+        .send({
+            inc_votes: 'Some Invalid data type'
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("PATCH 400: Responds with error message 'Bad request!' if comment_id is invalid data type", ()=>{
+        return request(app)
+        .patch("/api/comments/not_comment_id_type")
+        .send({
+            inc_votes: 3
+        })
+        .expect(400)
+        .then(({body}) => {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("PATCH 404: Responds with error message 'Comment_id not found' if comment_id is out of database range", ()=>{
+        return request(app)
+        .patch("/api/comments/9999999")
+        .send({
+            inc_votes: 3
+        })
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("Comment_id not found")
+        })
+    })
 })
 
 describe("/api/users", () => {
@@ -544,6 +689,32 @@ describe("/api/users", () => {
                     })
                 )
             })
+        })
+    })
+})
+
+describe("/api/users/:username", () => {
+    test("GET 200: Responds with the user that matches the given username", () => {
+        return request(app)
+        .get("/api/users/rogersop")
+        .expect(200)
+        .then(({body}) => {
+            const {user} = body
+            expect(user).toEqual(
+                expect.objectContaining({
+                    username: 'rogersop',
+                    name: 'paul',
+                    avatar_url: 'https://avatars2.githubusercontent.com/u/24394918?s=400&v=4'
+                })
+            )
+        })
+    })
+    test("GET 404: Responds with error message 'User not found'", () => {
+        return request(app)
+        .get("/api/users/username_does_not_exist")
+        .expect(404)
+        .then(({body}) => {
+            expect(body.msg).toBe("User not found")
         })
     })
 })
