@@ -293,10 +293,10 @@ describe("/api/articles",() => {
         })
     })
 
-    test("GET 200: Responds msg 'There is no article under this topic.' if the topic query exist but no linked article", ()=> {
+    test("GET 404: Responds msg 'There is no article under this topic.' if the topic query exist but no linked article", ()=> {
         return request(app)
         .get("/api/articles?topic=paper")
-        .expect(200)
+        .expect(404)
         .then(({body}) => {
             expect(body.msg).toBe("There is no article under this topic.")
         })

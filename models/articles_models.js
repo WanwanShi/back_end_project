@@ -43,7 +43,7 @@ function fetchAllArticles(query){
             return Promise.reject({ status: 400, msg: "Bad request!"})
         }
         if(rows.length === 0){
-            return Promise.reject({ status: 200, msg: "There is no article under this topic."})
+            return Promise.reject({ status: 404, msg: "There is no article under this topic."})
         }
         return rows
     })
@@ -61,8 +61,11 @@ function checkArticleIDExists(article_id){
 }
 
 function updateArticleById(article_id, inc_votes){
-    return Promise.all([db.query(`UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`, [inc_votes,article_id]),checkArticleIDExists(article_id)])
-    .then(([{rows}]) => {
+    return db.query(`UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`, [inc_votes,article_id])
+    .then(({rows}) => {
+        if(rows.length === 0){
+            return Promise.reject({ status: 404, msg: 'Article_id not found'})
+        }
         const updatedArticle = rows[0];
         if(updatedArticle.votes < 0){
             updatedArticle.votes = 0
