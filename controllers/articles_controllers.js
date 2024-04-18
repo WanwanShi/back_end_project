@@ -1,5 +1,5 @@
 
-const {fetchArticleById,fetchAllArticles, updateArticleById,addArticle} = require("../models/articles_models")
+const {fetchArticleById,fetchAllArticles, updateArticleById,addArticle, removeArticleById} = require("../models/articles_models")
 
 function getArticleById(req,res,next){
     const{ article_id } = req.params
@@ -10,9 +10,9 @@ function getArticleById(req,res,next){
 }
 
 function getAllArticles(req, res, next){
-    const { topic,sort_by,order}  = req.query
-    fetchAllArticles(topic,sort_by,order).then((articles) => {
-        res.status(200).send({articles})
+    const { topic,sort_by,order,limit,p}  = req.query
+    fetchAllArticles(topic,sort_by,order,limit,p).then((result) => {
+        res.status(200).send(result)
     })
     .catch(next)
 }
@@ -35,5 +35,13 @@ function postArticle(req, res, next){
     .catch(next)
 }
 
+function deleteArticleById(req, res, next){
+    const {article_id} = req.params;
+    removeArticleById(article_id).then(()=>{
+        res.status(204).send()
+    })
+    .catch(next)
+}
 
-module.exports = {getArticleById, getAllArticles,patchArticleById, postArticle}
+
+module.exports = {getArticleById, getAllArticles,patchArticleById, postArticle, deleteArticleById}

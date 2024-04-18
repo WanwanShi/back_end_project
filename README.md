@@ -3,7 +3,7 @@
 # ABOUT Northcoders News
     This is my first independent project. NC news is mainly a news web application. It allows users to create accounts, post, delete articles, and browse commented articles. It allows users to create an account, post, delete articles, browse commented articles, and filter articles on different topics through various filters, and so on.
 
-# LINK TO THE HOSTED VERSION
+# Link To the Hosted Version
     This is the link to the 1.0.0 version of the NC news: https://back-end-project-clnr.onrender.com/api/
     
     // I will put the screenshot of the web app here once I finished the frontend//
@@ -11,7 +11,7 @@
 
 
 
-# HOW TO INSTALL AND RUN Northcoders News Locally
+# How To Install And Run Northcoders News Locally
 - 1. Clone this repo https://github.com/WanwanShi/back_end_project-NC_news
     - In your terminal, go to the directory where you want to install the project;
     - run 'git clone https://github.com/WanwanShi/back_end_project-NC_news' in your terminal
@@ -34,6 +34,6 @@
 - 6. Run development using development database(if you wish to check project in the development stage)
     - run 'npm run seed', this will allow you to seed the development data
 
-# minimum version for Node.js Postgres
+# Minimum Version For Node.js And Postgres
 - Node.js v20.10.0
 - Postgres 14.10 

@@ -32,6 +32,47 @@ describe("/api/topics",() => {
         })
     })
 
+    test("POST 201: Responds with the newly added topic object", ()=> {
+        return request(app)
+        .post("/api/topics")
+        .send({
+            "slug": "new added topic",
+            "description": "This is the test for posting a new topic"
+        })
+        .expect(201)
+        .then(({body}) => {
+            const {topic} = body;
+            expect(topic).toEqual(
+                expect.objectContaining({
+                    "slug": "new added topic",
+                    "description": "This is the test for posting a new topic"
+                })
+            )
+        })
+    })
+    test("POST 400: Responds with error message 'Bad request!' when request body did not send 'slug' property", ()=>{
+        return request(app)
+        .post("/api/topics")
+        .send({
+            "description": "Some detail about the topic"
+        })
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("POST 400: Responds with error message 'Bad request-topic name can not be empty' when request body did not send 'slug' property", ()=>{
+        return request(app)
+        .post("/api/topics")
+        .send({
+            "slug": "",
+            "description": "Some detail about the topic"
+        })
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad request-topic name can not be empty")
+        })
+    })
 })
 
 describe("/NonExistRoute",() => {
@@ -224,6 +265,27 @@ describe("/api/articles/:article_id", () => {
             )
         })
     })
+    test("DELETE 204: Responds with 204 and no contents send back", ()=> {
+        return request(app)
+        .delete("/api/articles/3")
+        .expect(204)
+    })
+    test("DELETE 400: Responds with error message 'Bad request!' when article_id is invalid data type", ()=> {
+        return request(app)
+        .delete("/api/articles/invalid_article_id_type")
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+    test("DELETE 404: Responds with error message 'article_id not found' when article_id is out of database range", ()=> {
+        return request(app)
+        .delete("/api/articles/999999")
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("article_id not found")
+        })
+    })
 })
 
 describe("/api/articles",() => {
@@ -362,6 +424,67 @@ describe("/api/articles",() => {
         })
     })
 
+    test("GET 200: Responds with array of articles with specified limit number and default page 1", ()=>{
+        return request(app)
+        .get("/api/articles?limit=6")
+        .expect(200)
+        .then(({body})=>{
+            const {total_count,articles} = body
+            expect(articles.length).toBe(6)
+            expect(total_count).toBe(13)
+        })
+    })
+
+    test("GET 200: Responds with array of articles with specified page number and default limit 10", ()=>{
+        return request(app)
+        .get("/api/articles?p=2")
+        .expect(200)
+        .then(({body})=>{
+            const {total_count,articles} = body
+            expect(articles.length).toBe(3)
+            expect(total_count).toBe(13)
+        })
+    })
+
+    test("GET 200: Responds with array of articles with specified limit number and page number", ()=>{
+        return request(app)
+        .get("/api/articles?limit=6&&p=3")
+        .expect(200)
+        .then(({body})=>{
+            const {total_count,articles} = body
+            expect(articles.length).toBe(1)
+            expect(total_count).toBe(13)
+        })
+    })
+
+    test("GET 400: Responds with error message 'Bad request!' if the limit query is invalid type", ()=>{
+        return request(app)
+        .get("/api/articles?limit=not_a_number")
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("GET 400: Responds with error message 'Bad request!' if the p query is invalid type", ()=>{
+        return request(app)
+        .get("/api/articles?p=not_a_number")
+        .expect(400)
+        .then(({body})=>{
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("GET 404: Responds with error message 'Not found' if the p query is out of current range", ()=>{
+        return request(app)
+        .get("/api/articles?p=20")
+        .expect(404)
+        .then(({body})=>{
+            expect(body.msg).toBe("Not found")
+        })
+    })
+
+
     test("POST 201: Responds with a new created article object", () => {
         return request(app)
         .post("/api/articles")
@@ -476,12 +599,60 @@ describe("/api/articles/:article_id/comments", () => {
         })
     })
 
-    test("GET 200: Responds with 404 err and msg 'Not found' when the id is valid but no comments",()=> {
+    test("GET 200: Responds with 200 and msg 'There is no comment for this article' when the id is valid but no comments",()=> {
         return request(app)
         .get("/api/articles/10/comments")
         .expect(200)
         .then(({body})=> {
             expect(body.msg).toBe("There is no comment for this article")
+        })
+    })
+
+    test("GET 200: Responds with array of comment objects with specified limit number with default page 1",()=>{
+        return request(app)
+        .get("/api/articles/1/comments?limit=5")
+        .expect(200)
+        .then(({body})=> {
+            const {comments} = body
+            expect(comments.length).toBe(5)
+        })
+    })
+
+    test("GET 200: Responds with array of comment objects with specified  page number and default limit of 10",()=>{
+        return request(app)
+        .get("/api/articles/1/comments?p=2")
+        .expect(200)
+        .then(({body})=> {
+            const {comments} = body
+            expect(comments.length).toBe(1)
+        })
+    })
+
+    test("GET 200: Responds with array of comment objects with specified page number and limit number",()=>{
+        return request(app)
+        .get("/api/articles/1/comments?limit=4&&p=3")
+        .expect(200)
+        .then(({body})=> {
+            const {comments} = body
+            expect(comments.length).toBe(3)
+        })
+    })
+
+    test("GET 400: Responds with error message of 'Bad request!' with invalid limit or page type",()=>{
+        return request(app)
+        .get("/api/articles/1/comments?limit=invalid_data_type&&p=3")
+        .expect(400)
+        .then(({body})=> {
+            expect(body.msg).toBe("Bad request!")
+        })
+    })
+
+    test("GET 200: Responds with error message of 'There is no comment for this article' when page number is out of page range",()=>{
+        return request(app)
+        .get("/api/articles/1/comments?p=50")
+        .expect(200)
+        .then(({body})=> {
+            expect(body.msg).toBe("There is no more comment for this article")
         })
     })
 

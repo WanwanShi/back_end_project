@@ -1,5 +1,6 @@
 const db = require("../db/connection")
 const {fetchAllTopics} = require("../models/topics_models")
+const {displayResultWithLimitAndPage} = require("./utils")
 
 function fetchArticleById(article_id){
     const sqlString = `SELECT  articles.article_id, articles.title, articles.author,articles.topic,articles.body, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.body)::INT AS  comment_count
@@ -19,7 +20,7 @@ function fetchArticleById(article_id){
             })
 }
 
-function fetchAllArticles(topic,sort_by="created_at",order="desc"){
+function fetchAllArticles(topic,sort_by="created_at",order="desc",limit,p){
     
     const sortByGreenList = ["article_id", "title", "topic", "author","created_at","votes","body"];
     const orderGreenList = ["desc", "asc"];
@@ -50,14 +51,29 @@ function fetchAllArticles(topic,sort_by="created_at",order="desc"){
     
     return Promise.all([db.query(sqlString,queryVal),fetchAllTopics()])
     .then(([{rows},topics])=> {
-        
+        let articles = rows;
+
         if( topic && !topics.some((topicObj) => {return topicObj.slug === topic})){
             return Promise.reject({ status: 400, msg: "Bad request!"})
         }
         if(rows.length === 0){
             return Promise.reject({ status: 404, msg: "There is no article under this topic."})
         }
-        return rows
+
+        let total_count = rows.length
+        
+        if(limit || p){
+            if( (limit && isNaN(Number(limit))) || (p && isNaN(Number(p))) ){
+                return Promise.reject({status:400, msg: "Bad request!"})
+            }
+            articles = displayResultWithLimitAndPage(rows,limit,p)
+            if(articles.length === 0){
+                return Promise.reject({status: 404, msg: "Not found"})
+            }
+            return ({total_count,articles})
+        }
+
+        return {articles} 
     })
 }
 
@@ -108,8 +124,22 @@ function addArticle(articleRequestObj){
         return newArticle
         //Method 2 use this article_id and the function fetchArticleById()
         // return fetchArticleById(newArticle.article_id)
-    })
-    
-    
+    })   
 }
-module.exports = { fetchArticleById, fetchAllArticles,checkArticleIDExists, updateArticleById, addArticle }
+
+function removeArticleById(article_id){
+    const articleSqlString = `DELETE FROM articles WHERE article_id=$1 RETURNING *;`;
+    const commentSqlString = `DELETE FROM comments WHERE article_id=$1 RETURNING *;`
+    return db.query(commentSqlString,[article_id])
+    .then(({rows})=>{
+        return db.query(articleSqlString,[article_id])
+    })
+    .then(({rows}) => {
+        if(rows.length === 0){
+            return Promise.reject({ status: 404, msg: "article_id not found"})
+        }
+    })
+}
+
+
+module.exports = { fetchArticleById, fetchAllArticles,checkArticleIDExists, updateArticleById, addArticle, removeArticleById }

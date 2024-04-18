@@ -9,9 +9,16 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "POST /api/topics": {
+    "description": "serves an newly posted topic",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [{ "slug": "new topic", "description": "As described" }]
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "queries": ["author", "topic", "sort_by", "order","limit", "p"],
     "exampleResponse": {
       "articles": [
         {
@@ -47,7 +54,7 @@
   },
   "GET /api/articles/:article_id/comments": {
       "description": "serves an array of comments object with specified article_id",
-      "queries": [],
+      "queries": ["limit", "p"],
       "exampleResponse": {
       "comments":     [
           {
@@ -100,6 +107,11 @@
       }
     ]
   }
+},
+"DELETE /api/articles/:article_id": {
+  "description": "no contents send back",
+  "queries": [],
+  "exampleResponse": "no response"
 },
 "DELETE /api/comments/:comment_id": {
   "description": "no contents send",
